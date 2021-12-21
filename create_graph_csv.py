@@ -38,20 +38,21 @@ def create_graph(n):
     add_edges(green, red, graph_data, vertex_color)
     add_edges(red, blue, graph_data, vertex_color)
 
-    print(len(graph_data))
-
     df = pd.DataFrame(graph_data,
                       columns=['vertex1', 'vertex2', 'color1', 'color2'])
     df.to_csv("graph.csv", index=False)
     with open('reserve.txt', 'w') as out:
+        array = []
         for a in red:
-            out.write(f'red -> {a}\n')
+            array.append((a, f'{a} -> red\n'))
         for a in green:
-            out.write(f'green -> {a}\n')
+            array.append((a, f'{a} -> green\n'))
         for a in blue:
-            out.write(f'blue -> {a}\n')
+            array.append((a, f'{a} -> blue\n'))
+        out.write(''.join(map(lambda m: m[1],
+                              sorted(array, key=lambda m: m[0]))))
 
-
+    return len(graph_data)
 
 
 class GracefulKiller:
@@ -67,20 +68,21 @@ class GracefulKiller:
 
 if __name__ == "__main__":
     # n = int(input("Enter the number of vertices in a graph: "))
-    start = time.perf_counter()
+    max_working_time = 0
+    edge_amount = -1
     count = 0
     killer = GracefulKiller()
     try:
         while not killer.kill_now:
             count += 1
             n = random.randint(1, 1000)
+            m = create_graph(n)
             a = time.perf_counter()
-            create_graph(n)
-            b = time.perf_counter()
-            print(b - a)
             output = program.main()
-            a = time.perf_counter()
-            print(a - b)
+            b = time.perf_counter()
+            if b - a > max_working_time:
+                max_working_time = b - a
+                edge_amount = m
             if output:
                 print(output)
                 break
@@ -89,4 +91,5 @@ if __name__ == "__main__":
                 print(checker_output)
                 break
     finally:
+        print(f'{edge_amount} -> {max_working_time}')
         print(count)
