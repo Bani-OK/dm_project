@@ -1,3 +1,5 @@
+import sys
+
 import pandas as pd
 
 
@@ -160,11 +162,11 @@ def paint_graph(node: Statement, component_number: int):
 def select_colors(statements: list):
     for val in statements:
         if val.component == val.opposite.component:
-            print("It is impossible to color this graph")
-            return
+            print("Iit is impossible to color this graph")
+            sys.exit()
         if val.component > val.opposite.component:
-            val.mode_color = val.target_color
-            val.opposite.mode_color = val.target_color
+            val.node_color = val.target_color
+            val.opposite.node_color = val.target_color
 
 
 def write_to_file(node_names: dict):
