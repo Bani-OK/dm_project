@@ -8,41 +8,50 @@ import checker
 import program
 
 
-def create_graph(n, m):
+def add_edges(first_comp, second_comp, graph_data, vertex_color):
+    for v in first_comp:
+        for u in second_comp:
+            should_add = random.randint(0, 1)
+            if should_add:
+                graph_data.append([v, u, vertex_color[v], vertex_color[u]])
+
+
+def create_graph(n):
     graph_data = []
     colors = ["red", "green", "blue"]
     vertex_color = [random.choice(colors) for _ in range(n + 1)]
-    good = []
-    for i in range(n + 1):
-        a = ["red", "green", "blue"]
-        a.remove(vertex_color[i])
-        good.append(random.choice(a))
-    green = good.count("green")
-    red = good.count("red")
-    blue = good.count("blue")
-    m = min(m, red * green + red * blue + green * blue)
-    number_of_edges = 0
-    while number_of_edges < m:
-        v1 = random.randint(1, n)
-        v2 = random.randint(1, n)
+    green = []
+    red = []
+    blue = []
+    for i in range(1, n + 1):
+        if vertex_color[i] == "green":
+            a = random.choice([red, blue])
+            a.append(i)
+        elif vertex_color[i] == "blue":
+            a = random.choice([red, green])
+            a.append(i)
+        else:
+            a = random.choice([green, blue])
+            a.append(i)
 
-        if v1 == v2:
-            continue
-        if [v1, v2, vertex_color[v1], vertex_color[v2]] in graph_data or \
-                [v2, v1, vertex_color[v2], vertex_color[v1]] in graph_data:
-            continue
-        if good[v1] == good[v2]:
-            continue
-        number_of_edges += 1
+    add_edges(green, blue, graph_data, vertex_color)
+    add_edges(green, red, graph_data, vertex_color)
+    add_edges(red, blue, graph_data, vertex_color)
 
-        graph_data.append([v1, v2, vertex_color[v1], vertex_color[v2]])
+    print(len(graph_data))
 
     df = pd.DataFrame(graph_data,
                       columns=['vertex1', 'vertex2', 'color1', 'color2'])
     df.to_csv("graph.csv", index=False)
     with open('reserve.txt', 'w') as out:
-        for idx, val in enumerate(good):
-            out.write(f'{idx} -> {val}\n')
+        for a in red:
+            out.write(f'red -> {a}\n')
+        for a in green:
+            out.write(f'green -> {a}\n')
+        for a in blue:
+            out.write(f'blue -> {a}\n')
+
+
 
 
 class GracefulKiller:
@@ -65,9 +74,13 @@ if __name__ == "__main__":
         while not killer.kill_now:
             count += 1
             n = random.randint(1, 1000)
-            m = random.randint(0, min(n * (n - 1) // 2, 20000))
-            create_graph(n, m)
+            a = time.perf_counter()
+            create_graph(n)
+            b = time.perf_counter()
+            print(b - a)
             output = program.main()
+            a = time.perf_counter()
+            print(a - b)
             if output:
                 print(output)
                 break
@@ -75,7 +88,5 @@ if __name__ == "__main__":
             if checker_output is not None:
                 print(checker_output)
                 break
-    except:
-        pass
     finally:
         print(count)
