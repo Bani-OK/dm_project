@@ -1,4 +1,6 @@
 from manimlib import *
+from pynput.mouse import Listener
+import faulthandler
 
 
 class Node:
@@ -103,33 +105,32 @@ class Video(Scene):
     a = 0
     b = None
 
-    # def play(self, *args, **kwargs):
-    #     if self.b is not None:
-    #         self.remove(self.b)
-    #     self.b = Text(str(self.a)).to_edge(UR)
-    #     self.add(self.b)
-    #     self.a += 1
-
-        # super(Video, self).play(*args, **kwargs)
-
     def construct(self):
-        nodes, node_counter = self.make_nodes()
-        edges, edge_counter = self.make_edges(nodes)
-        graph = Graph(nodes, edges)
-        hide_stuff = self.show_answer(graph)
-        self.play(graph.get_objects().animate.shift(UP * 1.7 + RIGHT * 4.5),
-                  FadeOut(hide_stuff), FadeOut(node_counter),
-                  FadeOut(edge_counter))
-        statements, impl_edges, statements_group = \
-            self.start_solution(nodes, edges)
-        components_show = self.show_strong_components()
-        self.play(VGroup(components_show, statements_group)
-                  .animate.shift(DOWN * 8))
-        self.remove(components_show)
-        del components_show
-        self.statements_components(statements, statements_group)
-        self.wait()
-        self.thanks()
+        faulthandler.enable()
+        def constructc(x_coord, y, button, pressed):
+            nodes, node_counter = self.make_nodes()
+            edges, edge_counter = self.make_edges(nodes)
+            graph = Graph(nodes, edges)
+            hide_stuff = self.show_answer(graph)
+            self.play(
+                graph.get_objects().animate.shift(UP * 1.7 + RIGHT * 4.5),
+                FadeOut(hide_stuff), FadeOut(node_counter),
+                FadeOut(edge_counter))
+            statements, impl_edges, statements_group = \
+                self.start_solution(nodes, edges)
+            components_show = self.show_strong_components()
+            self.play(VGroup(components_show, statements_group)
+                      .animate.shift(DOWN * 8))
+            self.remove(components_show)
+            del components_show
+            self.statements_components(statements, statements_group)
+            self.wait()
+            self.thanks()
+
+        listener = Listener(on_click=constructc)
+        listener.start()
+
+
 
     def make_nodes(self):
         circles = [Node(Circle(stroke_color=GREY, stroke_width=4,
